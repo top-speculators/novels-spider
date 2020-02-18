@@ -1,2 +1,0 @@
-
-sqlC:/Users/Administrator/Desktop/Go/gin-blog/models/webConfig.go:180sSELECT config_name,config_value FROM "site_configs"  WHERE "site_configs"."deleted_at" IS NULL[] 0
