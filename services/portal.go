@@ -1,13 +1,16 @@
 package services
 
 import (
+	"gin-blog/utils"
+
 	"strconv"
 
 	"gin-blog/models"
 	"github.com/gin-gonic/gin"
 )
 
-const PAGENUM = 10
+// 默认分页
+var pageNum = utils.GetConfig("page_num").(uint64)
 
 // 前台页面通用数据
 func commonData() (links []*models.Link, categories []*models.Category, siteMap map[string]interface{}) {
@@ -38,14 +41,14 @@ func getPage(c *gin.Context) uint64 {
 
 // 404 处理
 func Handle404(c *gin.Context) {
-	c.String(404,"404 not found")
+	c.String(404, "404 not found")
 	c.Abort() // 避免后面 handlers 被调用
 }
 
 // 首页
 func Index(c *gin.Context) {
 	articleModel := &models.Article{}
-	articles := articleModel.GetList(1, PAGENUM, "")
+	articles := articleModel.GetList(1, pageNum, "")
 	links, categories, siteMap := commonData()
 
 	c.JSON(200, gin.H{
@@ -68,8 +71,8 @@ func Index(c *gin.Context) {
 // 分类列表页
 func Categories(c *gin.Context) {
 	categoryModel := &models.Category{}
-	categories := categoryModel.GetList(getPage(c), PAGENUM, "")
-	pageCount := categoryModel.PageCount(PAGENUM, "")
+	categories := categoryModel.GetList(getPage(c), pageNum, "")
+	pageCount := categoryModel.PageCount(pageNum, "")
 
 	links, _, siteMap := commonData()
 
@@ -102,8 +105,8 @@ func Articles(c *gin.Context) {
 	}
 
 	articleModel := &models.Article{}
-	articles := articleModel.GetList(getPage(c), PAGENUM, "category_id = ?", category.ID)
-	pageCount := articleModel.PageCount(PAGENUM, "")
+	articles := articleModel.GetList(getPage(c), pageNum, "category_id = ?", category.ID)
+	pageCount := articleModel.PageCount(pageNum, "")
 
 	links, categories, siteMap := commonData()
 
