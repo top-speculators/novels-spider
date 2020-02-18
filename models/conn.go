@@ -8,12 +8,6 @@ import (
 	"os"
 )
 
-type SEO struct {
-	SEOTitle       string `gorm:"type:varchar(200)"`
-	SEOKeyword     string `gorm:"type:varchar(200)"`
-	SEODescription string `gorm:"type:varchar(200)"`
-}
-
 var DB *gorm.DB
 
 func Conn() (db *gorm.DB, err error) {

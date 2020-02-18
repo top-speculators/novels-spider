@@ -1,4 +1,2 @@
 
-sqlC:/Users/cxl/Desktop/gin-blog/models/webConfig.go:18995.9µsSELECT config_name,config_value FROM "site_configs"  WHERE "site_configs"."deleted_at" IS NULL[] 0
-
-sqlC:/Users/cxl/Desktop/gin-blog/models/category.go:471.0006msSELECT * FROM "categories"  WHERE "categories"."deleted_at" IS NULL AND ((name = ?)) ORDER BY "categories"."id" ASC LIMIT 1[1] 0
+sqlC:/Users/Administrator/Desktop/Go/gin-blog/models/webConfig.go:180sSELECT config_name,config_value FROM "site_configs"  WHERE "site_configs"."deleted_at" IS NULL[] 0

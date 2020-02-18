@@ -37,7 +37,7 @@ func SetLogConfig(t bool, path string) {
 /**********    文件配置相关    ********/
 /************************************/
 
-var config map[string]interface{}
+var config = make(map[string]interface{})
 
 // 载入配置
 func LoadConfig(path string) error {
@@ -45,6 +45,7 @@ func LoadConfig(path string) error {
 	if err == nil {
 		err = yaml.Unmarshal(data, &config)
 	}
+
 	return err
 }
 

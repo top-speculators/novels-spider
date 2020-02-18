@@ -4,7 +4,6 @@ import "github.com/jinzhu/gorm"
 
 type Article struct {
 	gorm.Model
-	SEO
 
 	Title      string `gorm:"type:varchar(200)"`
 	Content    string `gorm:"type:text"`

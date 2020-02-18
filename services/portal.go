@@ -1,18 +1,13 @@
 package services
 
 import (
-	"gin-blog/utils"
-
 	"strconv"
 
 	"gin-blog/models"
 	"github.com/gin-gonic/gin"
 )
 
-// 默认分页
-var pageNum = utils.GetConfig("page_num").(uint64)
-
-// 前台页面通用数据
+// 前台各页面接口通用数据
 func commonData() (links []*models.Link, categories []*models.Category, siteMap map[string]interface{}) {
 
 	models.DB.Order("visits desc").Limit(6).Find(&categories)
@@ -20,8 +15,6 @@ func commonData() (links []*models.Link, categories []*models.Category, siteMap 
 
 	siteMap = make(map[string]interface{})
 	siteMap["siteTitle"] = models.GetSiteConfig("site_title")
-	siteMap["siteDescription"] = models.GetSiteConfig("site_description")
-	siteMap["siteKeyword"] = models.GetSiteConfig("site_keyword")
 	siteMap["siteCopyRight"] = models.GetSiteConfig("site_copyRight")
 	siteMap["siteCountCode"] = models.GetSiteConfig("site_count_code")
 

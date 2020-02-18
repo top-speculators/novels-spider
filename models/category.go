@@ -4,7 +4,6 @@ import "github.com/jinzhu/gorm"
 
 type Category struct {
 	gorm.Model
-	SEO
 
 	Name         string     `gorm:"type:vachar(50)"`
 	Articles     []*Article `gorm:"-"`

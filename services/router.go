@@ -7,9 +7,14 @@ import (
 )
 
 var RouterEngine *gin.Engine
+var pageNum uint64
 
 // 注册路由
 func RegisterRouter(r *gin.Engine) *gin.Engine {
+
+	numStr := utils.GetConfig("page_num").(int)
+	pageNum = uint64(numStr)
+
 	RouterEngine = r
 	r.NoRoute(Handle404)
 
