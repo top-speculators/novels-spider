@@ -1,18 +1,19 @@
 package services
 
 import (
-	"gin-blog/utils"
-
+	"gin-blog/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 var RouterEngine *gin.Engine
 var pageNum uint64
+var H interfaces.Helper
 
 // 注册路由
-func RegisterRouter(r *gin.Engine) *gin.Engine {
+func RegisterRouter(r *gin.Engine, h interfaces.Helper) *gin.Engine {
+	H = h
 
-	numStr := utils.GetConfig("page_num").(int)
+	numStr := H.GetConfig("page_num").(int)
 	pageNum = uint64(numStr)
 
 	RouterEngine = r
@@ -20,13 +21,8 @@ func RegisterRouter(r *gin.Engine) *gin.Engine {
 
 	// 静态资源
 	{
-		assetPath := utils.GetConfig("assets_path").(string)
+		assetPath := H.GetConfig("assets_path").(string)
 		r.Static("/asset", assetPath)
-	}
-
-	// 404 和 405 路由
-	{
-
 	}
 
 	// 前台路由

@@ -1,17 +1,22 @@
 package models
 
 import (
+	"gin-blog/interfaces"
+
 	"fmt"
-	"gin-blog/utils"
-	"github.com/jinzhu/gorm"
 	"log"
 	"os"
+
+	"github.com/jinzhu/gorm"
 )
 
 var DB *gorm.DB
+var H interfaces.Helper
 
-func Conn() (db *gorm.DB, err error) {
-	dbDsn := utils.GetConfig("db_dsn")
+func Conn(h interfaces.Helper) (db *gorm.DB, err error) {
+	H = h
+
+	dbDsn := h.GetConfig("db_dsn")
 	db, err = gorm.Open("sqlite3", dbDsn)
 	if err != nil {
 		return nil, err
@@ -28,7 +33,7 @@ func Conn() (db *gorm.DB, err error) {
 
 // 日志输出到文件
 func SetGormLogger() {
-	logFile := utils.GetConfig("db_log_file").(string)
+	logFile := H.GetConfig("db_log_file").(string)
 	f, err := os.Create(logFile)
 	if err != nil {
 		fmt.Printf("get form err: %s", err.Error())
