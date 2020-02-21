@@ -5,5 +5,7 @@ db_dsn: ./blog.db?_loc=Asia/Shanghai
 log_file: ./blog.log
 db_log_file: ./db.log
 log_type: true
-assets_path: ./templates/static
 page_num: 10
+portal_html: ./templates/html/portal.html
+admin_html: ./templates/html/admin.html
+static_path: ./templates/static/
