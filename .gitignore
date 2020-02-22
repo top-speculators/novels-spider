@@ -1,6 +1,5 @@
 /vendor
 /main_test.go
-/blog.log
 /.idea
-/db.log
+/logs/*
 /blog.db
