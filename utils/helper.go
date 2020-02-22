@@ -2,12 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
-
-	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v2"
 )
 
 type helper struct {
