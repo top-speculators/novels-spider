@@ -58,6 +58,7 @@ func main() {
 	}
 
 	// 数据库
+	// 目前 gorm 未提供读写分离功能，需自己实现，或改用 xorm
 	{
 		db, _ := blogdb.Conn(h)
 		defer func() {
