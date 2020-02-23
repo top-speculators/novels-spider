@@ -1,13 +1,15 @@
 package main
 
 import (
-	"gin-blog/models"
+	"gin-blog/crons"
+	"gin-blog/models/blogdb"
 	"gin-blog/services"
 	"gin-blog/utils"
 
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/robfig/cron/v3"
 )
 
 func main() {
@@ -57,19 +59,27 @@ func main() {
 
 	// 数据库
 	{
-		db, _ := models.Conn(h)
+		db, _ := blogdb.Conn(h)
 		defer func() {
 			_ = db.Close()
 		}()
 	}
 
-	// 路由及服务
-	{
-		addr := h.GetConfig("port").(string)
-		err := services.RegisterRouter(gin.New(), h).Run(addr)
-		if err != nil {
-			_ = seelog.Critical("http 服务启动错误", err)
-			return
-		}
+	// cron
+	go func() {
+		c := cron.New()
+		cronId1, _ := c.AddFunc("0 1 /2 * *", crons.CheckNovel)  // 每隔两天凌晨 1 点，检查是否有新小说
+		cronId2, _ := c.AddFunc("0 5 * * *", crons.CheckChapter) // 每天凌晨 5 点，检查所有小说章节是否有更新
+		seelog.Infof("计时任务已开启，%d d%", cronId1, cronId2)
+		c.Start()
+		select {}
+	}()
+
+	// web 服务
+	addr := h.GetConfig("port").(string)
+	err := services.RegisterRouter(gin.New(), h).Run(addr)
+	if err != nil {
+		_ = seelog.Critical("http 服务启动错误", err)
+		return
 	}
 }

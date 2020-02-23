@@ -1,0 +1,4 @@
+package crons
+
+func CheckNovel() {
+}

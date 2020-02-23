@@ -1,4 +1,4 @@
-package models
+package blogdb
 
 import "github.com/jinzhu/gorm"
 
