@@ -2,23 +2,22 @@ package services
 
 import (
 	"errors"
+	"gin-blog/models/blogdb"
 	"strconv"
-
-	"gin-blog/models"
 
 	"github.com/gin-gonic/gin"
 )
 
 // 前台各页面接口通用数据
-func commonData() (links []*models.Link, categories []*models.Category, siteMap map[string]interface{}) {
+func commonData() (links []*blogdb.Link, categories []*blogdb.Category, siteMap map[string]interface{}) {
 
-	models.DB.Order("visits desc").Limit(6).Find(&categories)
-	models.DB.Find(&links)
+	blogdb.DB.Order("visits desc").Limit(6).Find(&categories)
+	blogdb.DB.Find(&links)
 
 	siteMap = make(map[string]interface{})
-	siteMap["siteTitle"] = models.GetSiteConfig("site_title")
-	siteMap["siteCopyRight"] = models.GetSiteConfig("site_copyRight")
-	siteMap["siteCountCode"] = models.GetSiteConfig("site_count_code")
+	siteMap["siteTitle"] = blogdb.GetSiteConfig("site_title")
+	siteMap["siteCopyRight"] = blogdb.GetSiteConfig("site_copyRight")
+	siteMap["siteCountCode"] = blogdb.GetSiteConfig("site_count_code")
 
 	return
 }
@@ -49,7 +48,7 @@ func IndexHtml(c *gin.Context) {
 
 // 首页
 func Index(c *gin.Context) {
-	articleModel := &models.Article{}
+	articleModel := &blogdb.Article{}
 	articles := articleModel.GetList(1, pageNum, "")
 	links, categories, siteMap := commonData()
 
@@ -63,7 +62,7 @@ func Index(c *gin.Context) {
 
 // 分类列表页
 func Categories(c *gin.Context) {
-	categoryModel := &models.Category{}
+	categoryModel := &blogdb.Category{}
 	categories := categoryModel.GetList(getPage(c), pageNum, "")
 	pageCount := categoryModel.PageCount(pageNum, "")
 
@@ -81,14 +80,14 @@ func Categories(c *gin.Context) {
 func Articles(c *gin.Context) {
 
 	cate := c.Param("cate")
-	categoryModel := &models.Category{}
+	categoryModel := &blogdb.Category{}
 	category := categoryModel.First("name = ?", cate)
 	if category.ID == 0 {
 		Handle404(c)
 		return // 避免此 handler 后面的代码被调用
 	}
 
-	articleModel := &models.Article{}
+	articleModel := &blogdb.Article{}
 	articles := articleModel.GetList(getPage(c), pageNum, "category_id = ?", category.ID)
 	pageCount := articleModel.PageCount(pageNum, "")
 
@@ -108,9 +107,9 @@ func Articles(c *gin.Context) {
 func Article(c *gin.Context) {
 
 	id := c.Param("id")
-	articleModel := &models.Article{}
+	articleModel := &blogdb.Article{}
 	article := articleModel.First("id = ?", id)
-	categoryModel := &models.Category{}
+	categoryModel := &blogdb.Category{}
 	category := categoryModel.First("id = ?", article.CategoryId)
 
 	links, categories, siteMap := commonData()

@@ -6,12 +6,11 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 func Test(c *gin.Context) {
 	// Request the HTML page.
-	res, err := http.Get("http://www.biquge.tv/xiaoshuodaquan/")
+	res, err := http.Get("http://www.xbiquge.la/10/10489/9683462.html")
 	if err != nil {
 		_ = seelog.Critical("get failed", err)
 	}
@@ -33,16 +32,22 @@ func Test(c *gin.Context) {
 		return
 	}
 
-	list := make(map[string]interface{})
+	//list := make(map[string]interface{})
+
+	content := ""
+
 	// Find the review items
-	doc.Find(".novellist li").Each(func(i int, s *goquery.Selection) {
+	doc.Find(".box_con").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
-		name := s.Find("a").Text()
-		href, _ := s.Find("a").Attr("href")
-		hrefUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(href))
-		nameUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(name))
-		list[string(nameUTF)] = string(hrefUTF)
+		content = s.Find("#content").Text()
+		//href, _ := s.Find("a").Attr("href")
+		//hrefUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(href))
+		//nameUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(name))
+		//list[string(nameUTF)] = string(hrefUTF)
+		//content = string(nameUTF)
 	})
 
-	Success(c, list)
+	Success(c, gin.H{
+		"content": content,
+	})
 }

@@ -1,4 +1,4 @@
-package models
+package blogdb
 
 import (
 	"gin-blog/interfaces"

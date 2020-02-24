@@ -5,7 +5,11 @@ package interfaces
 // 这样底层实现的包随时可替换
 
 type Helper interface {
-	SetLogConfig(t bool, path string)
+	// 载入配置
+	// path 指配置文件路径，只支持 yaml 文件
 	LoadConfig(path string) error
+
+	// 获取配置值
+	// s 指配置名
 	GetConfig(s string) interface{}
 }
