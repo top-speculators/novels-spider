@@ -12,9 +12,8 @@ import (
 )
 
 // TODO:不同的源站，封装成不同的结构体
-// TODO:请求协程池
 
-// 已放入 mq 等待抓取的小说列表
+// novelsWorkingMap 代表已放入 mq 等待抓取的小说列表
 // 检查新小说的时候，需分别对比此变量与库中数据
 // 另外，每当消费者抓取完一本时，应使用 delete 函数删除该 key
 var novelsWorkingMap = make(map[string]int)
@@ -31,7 +30,8 @@ func GetNovelsWorkingMap() (nwm map[string]int, mu *sync.Mutex) {
 
 func CheckNovel() {
 	// 获取源站小说列表
-	_, err := GetOnlineNovels()
+	// 先爬取数据，避免占用 novelsWorkingMap 太久，影响到其他 goroutine
+	onlineNovels, err := GetOnlineNovels()
 	if err != nil {
 		_ = seelog.Error(err)
 		return
@@ -42,8 +42,10 @@ func CheckNovel() {
 	noveldb.DBs["read"].Select("name,author").Find(&novels)
 
 	// 按书名和作者，整理成 map 格式
+	// 已在库的，用不到 url，所以 value 定义为 int 类型
 	novelsMap := make(map[string]int)
 	for _, v := range novels {
+		// name 和 author 才能唯一决定一部小说
 		novelsMap[v.Name+"-"+v.Author] = 1
 	}
 
@@ -51,7 +53,15 @@ func CheckNovel() {
 	nwm, mu := GetNovelsWorkingMap()
 	defer mu.Unlock()
 
-	fmt.Println(nwm)
+	for k, v := range onlineNovels {
+		_, ok := nwm[k]
+		_, ok2 := novelsMap[k]
+		if !ok && !ok2 {
+			// 如果两个列表里都不存在该小说
+			// TODO:往消息队列里生产 Job
+			fmt.Println(v)
+		}
+	}
 }
 
 // 获取源站小说列表
@@ -59,6 +69,7 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 	startTime := time.Now()
 	novels = make(map[string]string)
 
+	// 源站分类 url 数组切片
 	paths := []string{
 		"http://www.biquge.tv/xuanhuanxiaoshuo/1_1.html",
 		"http://www.biquge.tv/xiuzhenxiaoshuo/2_1.html",
@@ -69,40 +80,65 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 		"http://www.biquge.tv/wanben/1_1",
 	}
 
-	// 取每分类页的分页 url
 	fmt.Println("=====================> 共" + strconv.Itoa(len(paths)) + "个分类")
+
+	// 此通道用于并发获取小说所开启时子协程到父协程的数据回传
+	// 这里的父子是逻辑关系，物理上，go 只有主协程和子协程
+	// 指定 1000 的容量，避免因为接收者定义在 “开启协程” 循环体的下面
+	// 而导致所有开启的协程都会因为没有接收者而阻塞的情况
+	// 若没有指定容量，则开启的 N 个协程，都会在等到接收者出现时，再统一释放
+	// 特别是在 “开启协程” 循环体内还存在 time.Sleep 的情况下，更应该注意
+	// 1000 的容量，则可以提前释放 1000 个 goroutine
+	// 之所以容量定 1000 ，考虑到所有分类下的所有分页，全部加起来，不超过 1000（目前源站时 973 页）
+	ch := make(chan map[string]string, 1000)
+
+	// 开启的总协程数，用于判断 ch 的关闭时机
+	var chsCount int
+
+	// 按小说分类遍历
 	for k, v := range paths {
 		startTime := time.Now()
 		fmt.Println("=====================> 当前第" + strconv.Itoa(k+1) + "个分类")
-		l, err := GetNovelCatePageList(v)
+
+		// 组织该分类下的所有分页 url
+		// 此方法为同步阻塞式请求，请求源站时不会挂起
+		l, err := GetNovelCatePages(v)
 		if err != nil {
 			return nil, err
 		}
 
-		// 取每一页的小说列表
 		fmt.Println("=====================> 当前分类共" + strconv.Itoa(len(l)) + "页")
-		for k, v := range l {
-			if k%50 == 0 && k != 0 {
-				fmt.Println("=====================> 已读取 50 页")
-			} else {
-				if k == len(l)-1 {
-					fmt.Println("=====================> 当前分类共" + strconv.Itoa(k+1) + "页读取完毕")
-				}
-			}
-			m, err := GetNovelList(v)
-			if err != nil {
-				return nil, err
+
+		// 遍历该分类下的所有分页，解析每一张 dom ，从中得到该页面上所出现的小说列表
+		for _, v := range l {
+			// 避免源站 timeout 限制 1 秒 15 并发请求
+			if chsCount%15 == 1 && chsCount != 1 {
+				fmt.Println("=====================> 已开启 15 个协程，先暂停 1 秒")
+				time.Sleep(time.Second)
 			}
 
-			// 将小说添加到结果数组中
-			for k, v := range m {
-				novels[k] = v
-			}
+			// 解析该页小说列表
+			go GetNovelsByCatePage(v, ch)
+			chsCount++
 		}
+
 		endTime := time.Now()                 // 结束时间
 		latencyTime := endTime.Sub(startTime) // 执行时间
 		fmt.Printf("=====================> 当前分类读取完毕，耗时 %13v \n", latencyTime)
-		fmt.Println("=====================> 开始读取下一分类")
+	}
+
+	// 处理回传的小说列表
+	fmt.Println(chsCount)
+	for {
+		if chsCount > 0 {
+			m := <-ch
+			chsCount--
+			for k, v := range m {
+				novels[k] = v
+			}
+		} else {
+			break
+		}
 	}
 
 	endTime := time.Now()                 // 结束时间
@@ -111,8 +147,8 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 	return
 }
 
-// 解析源站某分类所有列表页的 url
-func GetNovelCatePageList(path string) (list []string, err error) {
+// 解析源站某分类下的所有分页 url
+func GetNovelCatePages(path string) (list []string, err error) {
 	doc, err1 := H.GetDocumentByHttpGet(path)
 	if err1 != nil {
 		return nil, err1
@@ -136,14 +172,15 @@ func GetNovelCatePageList(path string) (list []string, err error) {
 	return
 }
 
-// 取每一页的小说列表
-func GetNovelList(path string) (m map[string]string, err error) {
+// 解析某分类页下的小说列表
+func GetNovelsByCatePage(path string, ch chan<- map[string]string) {
 	doc, err1 := H.GetDocumentByHttpGet(path)
 	if err1 != nil {
-		return nil, err1
+		_ = seelog.Error(err1)
+		return
 	}
 
-	m = make(map[string]string)
+	m := make(map[string]string)
 
 	doc.Find(".l li").Each(func(i int, s *goquery.Selection) {
 		author := s.Find(".s5").Text()
@@ -154,5 +191,8 @@ func GetNovelList(path string) (m map[string]string, err error) {
 
 		m[name+"-"+author] = href
 	})
-	return
+
+	ch <- m
+
+	// 可以在此处添加打印，来观察给 ch 指定容量和不给 ch 指定容量的不同现象
 }

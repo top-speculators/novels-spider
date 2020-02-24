@@ -101,9 +101,9 @@ func RegisterRouter(r *gin.Engine, h interfaces.Helper) *gin.Engine {
 		r.GET("/about", About)
 	}
 
-	// 爬虫
+	// 爬虫测试
 	{
-		r.GET("/spider/test",Test)
+		r.GET("/spider/test", Test)
 	}
 
 	// 后台路由

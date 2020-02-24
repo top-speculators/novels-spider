@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -71,7 +72,7 @@ func (h *helper) GetDocumentByHttpGet(path string) (doc *goquery.Document, err e
 	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode != 200 {
-		err = errors.New("源站返回错误码" + string(res.StatusCode))
+		err = errors.New("源站返回错误码" + strconv.Itoa(res.StatusCode))
 		return
 	}
 
@@ -122,4 +123,12 @@ func (h *helper) LoadConfig(path string) error {
 // 获取配置值
 func (h *helper) GetConfig(s string) interface{} {
 	return h.config[s]
+}
+
+/************************************/
+/**********    消息队列相关    ********/
+/************************************/
+
+func (h *helper) PutJob() {
+
 }

@@ -14,15 +14,6 @@ import (
 )
 
 func main() {
-	// 加载辅助函数实例
-	h := utils.New()
-	crons.SetHelper(h)
-	crons.CheckNovel()
-
-	select {}
-}
-
-func main2() {
 
 	// 日志
 	{
