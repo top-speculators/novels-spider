@@ -1,53 +1,30 @@
 package services
 
 import (
-	"net/http"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
 )
 
 func Test(c *gin.Context) {
-	// Request the HTML page.
-	res, err := http.Get("http://www.xbiquge.la/10/10489/9683462.html")
+
+	doc, err := H.GetDocumentByHttpGet("http://www.biquge.tv/xiaoshuodaquan/")
 	if err != nil {
-		_ = seelog.Critical("get failed", err)
-	}
-	defer func() { _ = res.Body.Close() }()
-
-	if res.StatusCode != 200 {
-		_ = seelog.Critical(res.StatusCode, res.Status)
+		_ = seelog.Critical(err)
 		return
 	}
+	list := make(map[string]interface{})
 
-	// Load the HTML document
-	doc, err1 := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		_ = seelog.Critical("document failed", err1)
-		return
-	}
-	if doc == nil {
-		_ = seelog.Critical("document is nil")
-		return
-	}
-
-	//list := make(map[string]interface{})
-
-	content := ""
-
-	// Find the review items
-	doc.Find(".box_con").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
-		content = s.Find("#content").Text()
-		//href, _ := s.Find("a").Attr("href")
-		//hrefUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(href))
-		//nameUTF, _ := simplifiedchinese.GBK.NewDecoder().Bytes([]byte(name))
-		//list[string(nameUTF)] = string(hrefUTF)
-		//content = string(nameUTF)
+	// 匹配内容
+	doc.Find(".novellist li").Each(func(i int, s *goquery.Selection) {
+		novelName := s.Find("a").Text()
+		novelHref, _ := s.Find("a").Attr("href")
+		novelName, _ = H.GBKToUTF8(novelName)
+		novelHref, _ = H.GBKToUTF8(novelHref)
+		list[novelName] = novelHref
 	})
 
 	Success(c, gin.H{
-		"content": content,
+		"content": list,
 	})
 }

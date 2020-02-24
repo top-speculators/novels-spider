@@ -1,5 +1,7 @@
 package interfaces
 
+import "github.com/PuerkitoBio/goquery"
+
 // 封装 Helper
 // 所有用到辅助函数的地方都依赖于此接口，而不依赖于具体的包，如 utils
 // 这样底层实现的包随时可替换
@@ -12,4 +14,16 @@ type Helper interface {
 	// 获取配置值
 	// s 指配置名
 	GetConfig(s string) interface{}
+
+	// 模拟 User-Agent
+	GetRandomUserAgent() string
+
+	// 抓取网页
+	GetDocumentByHttpGet(path string) (doc *goquery.Document, err error)
+
+	// GBK 转 UTF8
+	GBKToUTF8(html string) (str string, err error)
+
+	// UTF8 转 GBK
+	UTF8ToGBK(html string) (str string, err error)
 }
