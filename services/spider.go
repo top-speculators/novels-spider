@@ -1,7 +1,6 @@
 package services
 
 import (
-
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
