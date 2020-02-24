@@ -3,11 +3,13 @@ package main
 import (
 	"gin-blog/crons"
 	"gin-blog/models/blogdb"
+	"gin-blog/models/noveldb"
 	"gin-blog/services"
 	"gin-blog/utils"
 
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/robfig/cron/v3"
 )
@@ -58,12 +60,29 @@ func main() {
 	}
 
 	// 数据库
-	// 目前 gorm 未提供读写分离功能，需自己实现，或改用 xorm
+	// 目前 gorm 未提供读写分离功能，需自己实现，或改用 xorm，或直接使用 mycat 等数据库中间件
 	{
-		db, _ := blogdb.Conn(h)
+		// blog sqlite3
+		db, err1 := blogdb.Conn(h)
 		defer func() {
 			_ = db.Close()
 		}()
+		if err1 != nil {
+			_ = seelog.Error(err1)
+			return
+		}
+
+		// novel 库读写分离
+		novelDbs, err2 := noveldb.Conn(h)
+		defer func() {
+			for _, v := range novelDbs {
+				_ = v.Close()
+			}
+		}()
+		if err2 != nil {
+			_ = seelog.Error(err2)
+			return
+		}
 	}
 
 	// cron

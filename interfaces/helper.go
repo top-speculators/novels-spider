@@ -17,13 +17,10 @@ type Helper interface {
 
 	// 模拟 User-Agent
 	GetRandomUserAgent() string
-
 	// 抓取网页
 	GetDocumentByHttpGet(path string) (doc *goquery.Document, err error)
-
 	// GBK 转 UTF8
 	GBKToUTF8(html string) (str string, err error)
-
 	// UTF8 转 GBK
 	UTF8ToGBK(html string) (str string, err error)
 }

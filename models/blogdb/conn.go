@@ -33,7 +33,7 @@ func Conn(h interfaces.Helper) (db *gorm.DB, err error) {
 
 // 日志输出到文件
 func SetGormLogger() {
-	logFile := H.GetConfig("db_log_file").(string)
+	logFile := H.GetConfig("blog_db_log_file").(string)
 	f, err := os.Create(logFile)
 	if err != nil {
 		fmt.Printf("get form err: %s", err.Error())
