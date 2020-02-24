@@ -128,7 +128,6 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 	}
 
 	// 处理回传的小说列表
-	fmt.Println(chsCount)
 	for {
 		if chsCount > 0 {
 			m := <-ch
