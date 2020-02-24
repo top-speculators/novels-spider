@@ -6,7 +6,6 @@ import (
 	"gin-blog/models/noveldb"
 	"gin-blog/services"
 	"gin-blog/utils"
-
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -15,6 +14,15 @@ import (
 )
 
 func main() {
+	// 加载辅助函数实例
+	h := utils.New()
+	crons.SetHelper(h)
+	crons.CheckNovel()
+
+	select {}
+}
+
+func main2() {
 
 	// 日志
 	{
@@ -88,8 +96,9 @@ func main() {
 	// cron
 	go func() {
 		c := cron.New()
-		cronId1, _ := c.AddFunc("0 1 /2 * *", crons.CheckNovel)  // 每隔两天凌晨 1 点，检查是否有新小说
-		cronId2, _ := c.AddFunc("0 5 * * *", crons.CheckChapter) // 每天凌晨 5 点，检查所有小说章节是否有更新
+		crons.SetHelper(h)
+		cronId1, _ := c.AddFunc("0 1 /5 * *", crons.CheckNovel)  // 每 5 天凌晨 1 点，检查是否有新小说
+		cronId2, _ := c.AddFunc("0 6 * * *", crons.CheckChapter) // 每天凌晨 6 点，检查所有小说章节是否有更新
 		seelog.Infof("计时任务已开启，%d d%", cronId1, cronId2)
 		c.Start()
 		select {}
