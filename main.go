@@ -15,6 +15,9 @@ import (
 
 func main() {
 
+	// 加载辅助函数实例
+	h := utils.New()
+
 	// 日志
 	{
 		logger, err := seelog.LoggerFromConfigAsFile("./seelog_config.xml")
@@ -31,9 +34,6 @@ func main() {
 
 		defer seelog.Flush()
 	}
-
-	// 加载辅助函数实例
-	h := utils.New()
 
 	// 本地项目配置
 	{
@@ -82,6 +82,19 @@ func main() {
 			_ = seelog.Error(err2)
 			return
 		}
+	}
+
+	// beanstalkd 连接
+	{
+		err := h.BeanstalkdConn()
+		if err != nil {
+			_ = seelog.Error(err)
+			return
+		}
+		b := h.GetBeanstalkdConn()
+		defer func() {
+			_ = b.Close()
+		}()
 	}
 
 	// cron

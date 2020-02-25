@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/beanstalkd/beanstalk"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -128,7 +129,19 @@ func (h *helper) GetConfig(s string) interface{} {
 /************************************/
 /**********    消息队列相关    ********/
 /************************************/
+var beanstalkdConn *beanstalk.Conn
 
-func (h *helper) PutJob() {
+// 建立连接
+func (h *helper) BeanstalkdConn() error {
+	c, err := beanstalk.Dial("tcp", h.GetConfig("beanstalkd_dsn").(string))
+	if err != nil {
+		return err
+	}
+	beanstalkdConn = c
+	return nil
+}
 
+// 获取连接对象
+func (h *helper) GetBeanstalkdConn() *beanstalk.Conn {
+	return beanstalkdConn
 }

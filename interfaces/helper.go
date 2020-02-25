@@ -1,6 +1,9 @@
 package interfaces
 
-import "github.com/PuerkitoBio/goquery"
+import (
+	"github.com/PuerkitoBio/goquery"
+	"github.com/beanstalkd/beanstalk"
+)
 
 // 封装 Helper
 // 所有用到辅助函数的地方都依赖于此接口，而不依赖于具体的包，如 utils
@@ -25,7 +28,7 @@ type Helper interface {
 	// UTF8 转 GBK
 	UTF8ToGBK(html string) (str string, err error)
 
-	// 生成 Job
-	// 如果要替换驱动，则更换实现包，业务代码中仅依赖于此接口
-	PutJob()
+	// beanstalkd 相关
+	BeanstalkdConn() error
+	GetBeanstalkdConn() *beanstalk.Conn
 }
