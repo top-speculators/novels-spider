@@ -59,6 +59,7 @@ func CheckNovel() {
 		if !ok && !ok2 {
 			// 如果两个列表里都不存在
 			// TODO:往消息队列里生产 Job，往 nwm 中写入数据
+			newNovelTube := H.GetBeanTube("newNovel")
 			fmt.Println(v)
 		}
 	}

@@ -13,3 +13,6 @@ static_path: ./templates/static/
 # mysql
 mysql_dsn_read: user:password@/dbname?charset=utf8&parseTime=True&loc=Local
 mysql_dsn_writ: user:password@/dbname?charset=utf8&parseTime=True&loc=Local
+
+# beanstalkd
+beanstalkd_dsn:

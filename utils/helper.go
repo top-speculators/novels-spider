@@ -129,19 +129,24 @@ func (h *helper) GetConfig(s string) interface{} {
 /************************************/
 /**********    消息队列相关    ********/
 /************************************/
-var beanstalkdConn *beanstalk.Conn
+var beanConn *beanstalk.Conn
 
 // 建立连接
-func (h *helper) BeanstalkdConn() error {
+func (h *helper) BeanConn() error {
 	c, err := beanstalk.Dial("tcp", h.GetConfig("beanstalkd_dsn").(string))
 	if err != nil {
 		return err
 	}
-	beanstalkdConn = c
+	beanConn = c
 	return nil
 }
 
 // 获取连接对象
-func (h *helper) GetBeanstalkdConn() *beanstalk.Conn {
-	return beanstalkdConn
+func (h *helper) GetBeanConn() *beanstalk.Conn {
+	return beanConn
+}
+
+// 获取一个 Tube
+func (h *helper) GetBeanTube(name string) *beanstalk.Tube {
+	return &beanstalk.Tube{Conn: beanConn, Name: name}
 }

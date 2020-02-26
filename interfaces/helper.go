@@ -29,6 +29,8 @@ type Helper interface {
 	UTF8ToGBK(html string) (str string, err error)
 
 	// beanstalkd 相关
-	BeanstalkdConn() error
-	GetBeanstalkdConn() *beanstalk.Conn
+	BeanConn() error
+	// 直接操作 Conn ，默认 tube 为 default
+	GetBeanConn() *beanstalk.Conn
+	GetBeanTube(name string) *beanstalk.Tube
 }
