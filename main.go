@@ -86,12 +86,12 @@ func main() {
 
 	// beanstalkd 连接
 	{
-		err := h.BeanstalkdConn()
+		err := h.BeanConn()
 		if err != nil {
 			_ = seelog.Error(err)
 			return
 		}
-		b := h.GetBeanstalkdConn()
+		b := h.GetBeanConn()
 		defer func() {
 			_ = b.Close()
 		}()
