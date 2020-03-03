@@ -51,16 +51,25 @@ func CheckNovel() {
 
 	// 获取处理中的列表
 	nwm, mu := GetNovelsWorkingMap()
-	defer mu.Unlock()
+	defer mu.Unlock() // 在对比现有 novel 和 online novel 的整个过程，nwm 都会被阻塞
 
 	for k, v := range onlineNovels {
 		_, ok := nwm[k]
 		_, ok2 := novelsMap[k]
 		if !ok && !ok2 {
 			// 如果两个列表里都不存在
-			// TODO:往消息队列里生产 Job，往 nwm 中写入数据
+
+			// 往消息队列里生产 Job
 			newNovelTube := H.GetBeanTube("newNovel")
-			fmt.Println(v)
+			job := k + ":" + v
+			id, err := newNovelTube.Put([]byte(job), 1, 0, 120*time.Second) // 120 秒后触发 TTR
+			if err != nil {
+				// 写入 mq 失败，继续直接进入下一层循环
+				_ = seelog.Error(err)
+				continue
+			}
+			novelsMap[k] = 1 // 往 nwm 中写入数据
+			fmt.Println(id, err)
 		}
 	}
 }
