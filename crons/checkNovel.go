@@ -16,12 +16,12 @@ import (
 // novelsWorkingMap 代表已放入 mq 等待抓取的小说列表
 // 检查新小说的时候，需分别对比此变量与库中数据
 // 另外，每当消费者抓取完一本时，应使用 delete 函数删除该 key
-var novelsWorkingMap = make(map[string]int)
+var novelsWorkingMap = make(map[string]uint64)
 var Mu sync.Mutex
 
 // 互斥形式得到 novelsWorkingMap
 // 注意接收方一定要 mu.Unlock()
-func GetNovelsWorkingMap() (nwm map[string]int, mu *sync.Mutex) {
+func GetNovelsWorkingMap() (nwm map[string]uint64, mu *sync.Mutex) {
 	Mu.Lock()
 	mu = &Mu
 	nwm = novelsWorkingMap
@@ -43,7 +43,7 @@ func CheckNovel() {
 
 	// 按书名和作者，整理成 map 格式
 	// 已在库的，用不到 url，所以 value 定义为 int 类型
-	novelsMap := make(map[string]int)
+	novelsMap := make(map[string]uint64)
 	for _, v := range novels {
 		// name 和 author 才能唯一决定一部小说
 		novelsMap[v.Name+"-"+v.Author] = 1
@@ -68,8 +68,7 @@ func CheckNovel() {
 				_ = seelog.Error(err)
 				continue
 			}
-			novelsMap[k] = 1 // 往 nwm 中写入数据
-			fmt.Println(id, err)
+			novelsMap[k] = id // 往 nwm 中写入数据
 		}
 	}
 }
@@ -101,6 +100,7 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 	// 1000 的容量，则可以提前释放 1000 个 goroutine
 	// 之所以容量定 1000 ，考虑到所有分类下的所有分页，全部加起来，不超过 1000（目前源站是 973 页）
 	ch := make(chan map[string]string, 1000)
+	defer close(ch)
 
 	// 开启的总协程数，用于判断 ch 的关闭时机
 	var chsCount int
