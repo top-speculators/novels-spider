@@ -111,7 +111,7 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 		fmt.Println("=====================> 当前第" + strconv.Itoa(k+1) + "个分类")
 
 		// 组织该分类下的所有分页 url
-		// 此方法为同步阻塞式请求，请求源站时不会挂起
+		// 此方法为同步阻塞式请求
 		l, err := GetNovelCatePages(v)
 		if err != nil {
 			return nil, err
