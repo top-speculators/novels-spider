@@ -108,6 +108,16 @@ func main() {
 		select {}
 	}()
 
+	// check novel customer
+	go func() {
+
+	}()
+
+	// check chapter customer
+	go func() {
+
+	}()
+
 	// web 服务
 	addr := h.GetConfig("port").(string)
 	err := services.RegisterRouter(gin.New(), h).Run(addr)

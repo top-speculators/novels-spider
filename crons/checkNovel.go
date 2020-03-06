@@ -61,7 +61,7 @@ func CheckNovel() {
 			// 如果两个列表里都不存在
 
 			// 往消息队列里生产 Job
-			newNovelTube := H.GetBeanTube("newNovel")
+			newNovelTube := H.GetBeanTube(NewNovelTube)
 
 			// name-author:href:channel
 			job := k + ":" + v + ":" + string(novelOnlineChannel)

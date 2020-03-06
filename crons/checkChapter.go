@@ -47,13 +47,13 @@ func CheckOnlineChapter(v *noveldb.Novel) {
 	noveldb.DBs["read"].Select("id").Where("channel = ?", 1).Where("source_id = ?", v.SourceId).Count(&count)
 	if (onlineSum - 9) > count {
 		// 有更新，生成 Job
-		ChapterUpdaterTube := H.GetBeanTube("chapterUpdater")
+		chapterUpdaterTube := H.GetBeanTube(ChapterUpdaterTube)
 		// href:分表号:渠道号:资源ID:生成任务时的已有章节数
 		job := v.Href + ":" + string(v.ChapterTableNumber) + ":" + string(v.Channel) + ":" + string(v.SourceId) + ":" + string(count)
 		// 优先级，越早的 job 越先消费，使 job 呈队列状
 		// 避免一个 cron 周期间隔后，消费者还未消费完该次 cron 所生产的所有 job，从而导致出现漏抓章节问题
 		pri := 999999999999999 - time.Now().Second()
-		_, err := ChapterUpdaterTube.Put([]byte(job), uint32(pri), 0, 120*time.Second) // 120 秒后触发 TTR
+		_, err := chapterUpdaterTube.Put([]byte(job), uint32(pri), 0, 120*time.Second) // 120 秒后触发 TTR
 		if err != nil {
 			_ = seelog.Error(err, job)
 		}
