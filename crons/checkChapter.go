@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// 检查所有库存小说
 func CheckChapter() {
 
 	// 拉取所有库中的 novel
@@ -28,6 +29,8 @@ func CheckChapter() {
 	// 所以只在消费者做数据入库时保证幂等性即可
 }
 
+// 检查单本小说是否更新
+// 若有更新，则将小说写入 mq
 func CheckOnlineChapter(v *noveldb.Novel) {
-
+	url := v.Href
 }

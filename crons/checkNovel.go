@@ -18,6 +18,7 @@ import (
 // 另外，每当消费者抓取完一本时，应使用 delete 函数删除该 key
 var novelsWorkingMap = make(map[string]uint64)
 var Mu sync.Mutex
+var novelOnlineChannel = 1 // novel 在线渠道，1 为 biquge.tv
 
 // 互斥形式得到 novelsWorkingMap
 // 注意接收方一定要 mu.Unlock()
@@ -61,7 +62,7 @@ func CheckNovel() {
 
 			// 往消息队列里生产 Job
 			newNovelTube := H.GetBeanTube("newNovel")
-			job := k + ":" + v
+			job := k + ":" + v + ":" + string(novelOnlineChannel)
 			id, err := newNovelTube.Put([]byte(job), 1, 0, 120*time.Second) // 120 秒后触发 TTR
 			if err != nil {
 				// 写入 mq 失败，继续直接进入下一层循环
