@@ -61,14 +61,14 @@ func CheckNovel() {
 
 			// 往消息队列里生产 Job
 			newNovelTube := H.GetBeanTube("newNovel")
-			job := k + ":" + v
+			job := k + ":" + v                                              // 仙逆-耳根:http://ssss
 			id, err := newNovelTube.Put([]byte(job), 1, 0, 120*time.Second) // 120 秒后触发 TTR
 			if err != nil {
 				// 写入 mq 失败，继续直接进入下一层循环
-				_ = seelog.Error(err)
+				_ = seelog.Error(err, job)
 				continue
 			}
-			novelsMap[k] = id // 往 nwm 中写入数据
+			novelsMap[k] = id // 往 nwm 中写入数据，等消费者执行结束后，再删除
 		}
 	}
 }
