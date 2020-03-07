@@ -10,7 +10,7 @@ import (
 // 当修改了配置文件，需重启项目来使其生效
 // 注意这个配置，无法生效在其他包的 init 函数，因为那时候还未载入
 func LoadLocalConfig() {
-	err := helpers.LoadConfig("./config.yaml")
+	err := helpers.LoadConfig("./confs/config.yaml")
 	if err != nil {
 		_ = seelog.Critical("本地配置加载错误", err)
 		return

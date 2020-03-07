@@ -4,7 +4,7 @@ import "github.com/cihub/seelog"
 
 // 加载日志
 func LoadLogger() {
-	logger, err := seelog.LoggerFromConfigAsFile("./seelog_config.xml")
+	logger, err := seelog.LoggerFromConfigAsFile("./confs/seelog_config.xml")
 	if err != nil {
 		_ = seelog.Critical("seelog 配置文件错误", err)
 		return
