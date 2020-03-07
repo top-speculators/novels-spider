@@ -1,10 +1,10 @@
 package main
 
 import (
-	"gin-blog/crons"
 	"gin-blog/models/blogdb"
 	"gin-blog/models/noveldb"
 	"gin-blog/services"
+	"gin-blog/services/crons"
 	"gin-blog/utils"
 	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
