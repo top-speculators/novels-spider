@@ -1,32 +1,20 @@
-package utils
+package helpers
 
 import (
 	"errors"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/beanstalkd/beanstalk"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-type helper struct {
-	config map[string]interface{}
-}
-
-func New() *helper {
-	return &helper{}
-}
-
 /************************************/
 /**********    爬虫函数相关    ********/
 /************************************/
 
 // 模拟 User-Agent
-func (h *helper) GetRandomUserAgent() string {
+func GetRandomUserAgent() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var UserAgentList = []string{
 		"Mozilla/5.0 (compatible, MSIE 10.0, Windows NT, DigExt)",
@@ -49,7 +37,7 @@ func (h *helper) GetRandomUserAgent() string {
 
 // 抓取 HTML
 // TODO:引入 proxy 避免爬取次数太多被拉黑
-func (h *helper) GetDocumentByHttpGet(path string) (doc *goquery.Document, err error) {
+func GetDocumentByHttpGet(path string) (doc *goquery.Document, err error) {
 	// http client
 	client := &http.Client{
 		Timeout: time.Second * 2,
@@ -63,7 +51,7 @@ func (h *helper) GetDocumentByHttpGet(path string) (doc *goquery.Document, err e
 	}
 
 	// add User-Agent
-	req.Header.Add("User-Agent", h.GetRandomUserAgent())
+	req.Header.Add("User-Agent", GetRandomUserAgent())
 
 	res, err1 := client.Do(req)
 	if err1 != nil {
@@ -87,66 +75,4 @@ func (h *helper) GetDocumentByHttpGet(path string) (doc *goquery.Document, err e
 	}
 
 	return
-}
-
-// GBK 转 UTF8
-func (h *helper) GBKToUTF8(html string) (str string, err error) {
-	var str1 []byte
-	str1, err = simplifiedchinese.GB18030.NewDecoder().Bytes([]byte(html))
-	str = string(str1)
-	return
-}
-
-// UTF8 转 GBK
-func (h *helper) UTF8ToGBK(html string) (str string, err error) {
-	var str1 []byte
-	str1, err = simplifiedchinese.GB18030.NewEncoder().Bytes([]byte(html))
-	str = string(str1)
-	return
-}
-
-/************************************/
-/**********    文件配置相关    ********/
-/************************************/
-
-// 载入配置
-func (h *helper) LoadConfig(path string) error {
-	h.config = make(map[string]interface{})
-
-	data, err := ioutil.ReadFile(path)
-	if err == nil {
-		err = yaml.Unmarshal(data, h.config)
-	}
-
-	return err
-}
-
-// 获取配置值
-func (h *helper) GetConfig(s string) interface{} {
-	return h.config[s]
-}
-
-/************************************/
-/**********    消息队列相关    ********/
-/************************************/
-var beanConn *beanstalk.Conn
-
-// 建立连接
-func (h *helper) BeanConn() error {
-	c, err := beanstalk.Dial("tcp", h.GetConfig("beanstalkd_dsn").(string))
-	if err != nil {
-		return err
-	}
-	beanConn = c
-	return nil
-}
-
-// 获取连接对象
-func (h *helper) GetBeanConn() *beanstalk.Conn {
-	return beanConn
-}
-
-// 获取一个 Tube
-func (h *helper) GetBeanTube(name string) *beanstalk.Tube {
-	return &beanstalk.Tube{Conn: beanConn, Name: name}
 }

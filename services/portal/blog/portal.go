@@ -1,26 +1,12 @@
-package services
+package blog
 
 import (
 	"errors"
-	"gin-blog/models/blogdb"
+	"novels-spider/models/blogdb"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
-
-// 前台各页面接口通用数据
-func commonData() (links []*blogdb.Link, categories []*blogdb.Category, siteMap map[string]interface{}) {
-
-	blogdb.DB.Order("visits desc").Limit(6).Find(&categories)
-	blogdb.DB.Find(&links)
-
-	siteMap = make(map[string]interface{})
-	siteMap["siteTitle"] = blogdb.GetSiteConfig("site_title")
-	siteMap["siteCopyRight"] = blogdb.GetSiteConfig("site_copyRight")
-	siteMap["siteCountCode"] = blogdb.GetSiteConfig("site_count_code")
-
-	return
-}
 
 // 页码处理
 func getPage(c *gin.Context) uint64 {
@@ -37,13 +23,6 @@ func getPage(c *gin.Context) uint64 {
 func Handle404(c *gin.Context) {
 	Failed(c, 404, errors.New("资源不存在"))
 	c.Abort() // 避免后面 handlers 被调用
-}
-
-// 首页 html
-func IndexHtml(c *gin.Context) {
-	path := H.GetConfig("portal_html").(string)
-	RouterEngine.LoadHTMLFiles(path)
-	c.HTML(200, "portal.html", gin.H{})
 }
 
 // 首页

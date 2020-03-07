@@ -2,9 +2,11 @@ package crons
 
 import (
 	"fmt"
-	"gin-blog/models/noveldb"
-	"github.com/cihub/seelog"
+	"novels-spider/models/noveldb"
+	"novels-spider/pkg/helpers"
 	"time"
+
+	"github.com/cihub/seelog"
 )
 
 // 检查所有库存小说
@@ -34,7 +36,7 @@ func CheckChapter() {
 // 若有更新，则将小说写入 mq
 func CheckOnlineChapter(v *noveldb.Novel) {
 	// 爬取
-	doc, err1 := H.GetDocumentByHttpGet(v.Href)
+	doc, err1 := helpers.GetDocumentByHttpGet(v.Href)
 	if err1 != nil {
 		_ = seelog.Error(err1)
 		return
@@ -47,7 +49,7 @@ func CheckOnlineChapter(v *noveldb.Novel) {
 	noveldb.DBs["read"].Select("id").Where("channel = ?", 1).Where("source_id = ?", v.SourceId).Count(&count)
 	if (onlineSum - 9) > count {
 		// 有更新，生成 Job
-		chapterUpdaterTube := H.GetBeanTube(ChapterUpdaterTube)
+		chapterUpdaterTube := helpers.GetBeanTube(ChapterUpdaterTube)
 		// href:分表号:渠道号:资源ID:生成任务时的已有章节数
 		job := v.Href + ":" + string(v.ChapterTableNumber) + ":" + string(v.Channel) + ":" + string(v.SourceId) + ":" + string(count)
 		// 优先级，越早的 job 越先消费，使 job 呈队列状

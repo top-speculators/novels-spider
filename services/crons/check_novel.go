@@ -2,13 +2,16 @@ package crons
 
 import (
 	"fmt"
-	"gin-blog/models/noveldb"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/cihub/seelog"
+	"novels-spider/pkg/helpers"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"novels-spider/models/noveldb"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/cihub/seelog"
 )
 
 // TODO:不同的源站，封装成不同的结构体
@@ -61,7 +64,7 @@ func CheckNovel() {
 			// 如果两个列表里都不存在
 
 			// 往消息队列里生产 Job
-			newNovelTube := H.GetBeanTube(NewNovelTube)
+			newNovelTube := helpers.GetBeanTube(NewNovelTube)
 
 			// name-author:href:channel
 			job := k + ":" + v + ":" + string(novelOnlineChannel)
@@ -161,7 +164,7 @@ func GetOnlineNovels() (novels map[string]string, err error) {
 
 // 解析源站某分类下的所有分页 url
 func GetNovelCatePages(path string) (list []string, err error) {
-	doc, err1 := H.GetDocumentByHttpGet(path)
+	doc, err1 := helpers.GetDocumentByHttpGet(path)
 	if err1 != nil {
 		return nil, err1
 	}
@@ -186,7 +189,7 @@ func GetNovelCatePages(path string) (list []string, err error) {
 
 // 解析某分类页下的小说列表
 func GetNovelsByCatePage(path string, ch chan<- map[string]string) {
-	doc, err1 := H.GetDocumentByHttpGet(path)
+	doc, err1 := helpers.GetDocumentByHttpGet(path)
 	if err1 != nil {
 		_ = seelog.Error(err1)
 		return
@@ -198,8 +201,8 @@ func GetNovelsByCatePage(path string, ch chan<- map[string]string) {
 		author := s.Find(".s5").Text()
 		name := s.Find(".s2 a").Text()
 		href, _ := s.Find(".s2 a").Attr("href")
-		author, _ = H.GBKToUTF8(author)
-		name, _ = H.GBKToUTF8(name)
+		author, _ = helpers.GBKToUTF8(author)
+		name, _ = helpers.GBKToUTF8(name)
 
 		m[name+"-"+author] = href
 	})

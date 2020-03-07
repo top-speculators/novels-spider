@@ -1,22 +1,19 @@
 package blogdb
 
 import (
-	"gin-blog/interfaces"
-
 	"fmt"
 	"log"
+	"novels-spider/pkg/helpers"
 	"os"
 
 	"github.com/jinzhu/gorm"
 )
 
 var DB *gorm.DB
-var H interfaces.Helper
 
-func Conn(h interfaces.Helper) (db *gorm.DB, err error) {
-	H = h
+func Conn() (db *gorm.DB, err error) {
 
-	dbDsn := h.GetConfig("db_dsn")
+	dbDsn := helpers.GetConfig("db_dsn")
 	db, err = gorm.Open("sqlite3", dbDsn)
 	if err != nil {
 		return nil, err
@@ -33,7 +30,7 @@ func Conn(h interfaces.Helper) (db *gorm.DB, err error) {
 
 // 日志输出到文件
 func SetGormLogger() {
-	logFile := H.GetConfig("blog_db_log_file").(string)
+	logFile := helpers.GetConfig("blog_db_log_file").(string)
 	f, err := os.Create(logFile)
 	if err != nil {
 		fmt.Printf("get form err: %s", err.Error())
