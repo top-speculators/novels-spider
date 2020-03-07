@@ -4,7 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/sirupsen/logrus"
+	// "github.com/sirupsen/logrus"
+	"fmt"
 	"novels-spider/conf"
 	"novels-spider/pkg/bootstrap"
 	"novels-spider/services"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 
-	bootstrap.LoadLogger()
+	// bootstrap.LoadLogger()
 
 	bootstrap.SetDebugMode()
 
@@ -30,11 +31,13 @@ func main() {
 	// customers
 	customers.StartListen()
 
+    bootstrap.SetupQueue()
+
 	// web 服务
 	addr := conf.Port
 	err := services.RegisterRouter(gin.New()).Run(addr)
 	if err != nil {
-		logrus.Error("http 服务启动错误", err)
+		fmt.Printf("Failed to star server: %s \n", err)
 		return
 	}
 }

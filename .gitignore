@@ -1,6 +1,5 @@
-/vendor
-/main_test.go
-/.idea
-/runtime/logs/*
-/blog.db
-/conf/ini.go
+vendor
+main_test.go
+.idea
+runtime
+blog.db
