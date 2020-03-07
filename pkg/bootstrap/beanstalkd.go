@@ -2,7 +2,7 @@ package bootstrap
 
 import (
 	"github.com/beanstalkd/beanstalk"
-	"github.com/cihub/seelog"
+	"github.com/sirupsen/logrus"
 	"novels-spider/pkg/helpers"
 )
 
@@ -11,7 +11,7 @@ var bean *beanstalk.Conn
 func LoadMQConnection() {
 	err := helpers.BeanConn()
 	if err != nil {
-		_ = seelog.Error(err)
+		logrus.Error(err)
 		return
 	}
 	bean = helpers.GetBeanConn()

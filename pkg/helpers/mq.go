@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"github.com/beanstalkd/beanstalk"
+	"novels-spider/conf"
 )
 
 /************************************/
@@ -11,7 +12,7 @@ var beanConn *beanstalk.Conn
 
 // 建立连接
 func BeanConn() error {
-	c, err := beanstalk.Dial("tcp", GetConfig("beanstalkd_dsn").(string))
+	c, err := beanstalk.Dial("tcp", conf.Beanstalkd)
 	if err != nil {
 		return err
 	}

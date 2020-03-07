@@ -3,7 +3,7 @@ package blogdb
 import (
 	"fmt"
 	"log"
-	"novels-spider/pkg/helpers"
+	"novels-spider/conf"
 	"os"
 
 	"github.com/jinzhu/gorm"
@@ -13,7 +13,7 @@ var DB *gorm.DB
 
 func Conn() (db *gorm.DB, err error) {
 
-	dbDsn := helpers.GetConfig("db_dsn")
+	dbDsn := conf.BlogDB
 	db, err = gorm.Open("sqlite3", dbDsn)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func Conn() (db *gorm.DB, err error) {
 
 // 日志输出到文件
 func SetGormLogger() {
-	logFile := helpers.GetConfig("blog_db_log_file").(string)
+	logFile := conf.BlogDBLog
 	f, err := os.Create(logFile)
 	if err != nil {
 		fmt.Printf("get form err: %s", err.Error())

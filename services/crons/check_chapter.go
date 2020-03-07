@@ -2,11 +2,10 @@ package crons
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"novels-spider/models/noveldb"
 	"novels-spider/pkg/helpers"
 	"time"
-
-	"github.com/cihub/seelog"
 )
 
 // 检查所有库存小说
@@ -38,7 +37,7 @@ func CheckOnlineChapter(v *noveldb.Novel) {
 	// 爬取
 	doc, err1 := helpers.GetDocumentByHttpGet(v.Href)
 	if err1 != nil {
-		_ = seelog.Error(err1)
+		logrus.Error(err1)
 		return
 	}
 
@@ -57,7 +56,7 @@ func CheckOnlineChapter(v *noveldb.Novel) {
 		pri := 999999999999999 - time.Now().Second()
 		_, err := chapterUpdaterTube.Put([]byte(job), uint32(pri), 0, 120*time.Second) // 120 秒后触发 TTR
 		if err != nil {
-			_ = seelog.Error(err, job)
+			logrus.Error(err, job)
 		}
 	}
 

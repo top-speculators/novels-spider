@@ -2,6 +2,7 @@ package crons
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"novels-spider/pkg/helpers"
 	"strconv"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"novels-spider/models/noveldb"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/cihub/seelog"
 )
 
 // TODO:不同的源站，封装成不同的结构体
@@ -37,7 +37,7 @@ func CheckNovel() {
 	// 先爬取数据，避免占用 novelsWorkingMap 太久，影响到其他 goroutine
 	onlineNovels, err := GetOnlineNovels()
 	if err != nil {
-		_ = seelog.Error(err)
+		logrus.Error(err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func CheckNovel() {
 			id, err := newNovelTube.Put([]byte(job), 1, 0, 120*time.Second) // 120 秒后触发 TTR
 			if err != nil {
 				// 写入 mq 失败，继续直接进入下一层循环
-				_ = seelog.Error(err, job)
+				logrus.Error(err, job)
 				continue
 			}
 			novelsMap[k] = id // 往 nwm 中写入数据，等消费者执行结束后，再删除
@@ -191,7 +191,7 @@ func GetNovelCatePages(path string) (list []string, err error) {
 func GetNovelsByCatePage(path string, ch chan<- map[string]string) {
 	doc, err1 := helpers.GetDocumentByHttpGet(path)
 	if err1 != nil {
-		_ = seelog.Error(err1)
+		logrus.Error(err1)
 		return
 	}
 

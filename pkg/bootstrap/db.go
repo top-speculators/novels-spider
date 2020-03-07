@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"github.com/cihub/seelog"
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 	"novels-spider/models/blogdb"
 	"novels-spider/models/noveldb"
 )
@@ -16,14 +16,14 @@ func LoadDBConnections() {
 	var err error
 	db, err = blogdb.Conn()
 	if err != nil {
-		_ = seelog.Error(err)
+		logrus.Error(err)
 		return
 	}
 
 	// novel 库读写分离
 	novelDbs, err = noveldb.Conn()
 	if err != nil {
-		_ = seelog.Error(err)
+		logrus.Error(err)
 		return
 	}
 }

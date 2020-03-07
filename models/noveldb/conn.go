@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"log"
-	"novels-spider/pkg/helpers"
+	"novels-spider/conf"
 	"os"
 )
 
@@ -14,9 +14,29 @@ func Conn() (dbs map[string]*gorm.DB, err error) {
 	dbs = make(map[string]*gorm.DB)
 
 	// 建立连接
-	dsnRead := helpers.GetConfig("mysql_dsn_read")
+	dsnRead := fmt.Sprintf(
+		"%s:%s@(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s",
+		conf.MysqlAvatarRead["username"],
+		conf.MysqlAvatarRead["password"],
+		conf.MysqlAvatarRead["ip"],
+		conf.MysqlAvatarRead["port"],
+		conf.MysqlAvatarRead["database"],
+		conf.MysqlAvatarRead["charset"],
+		conf.MysqlAvatarRead["parseTime"],
+		conf.MysqlAvatarRead["loc"],
+	)
 	dbs["read"], err = gorm.Open("mysql", dsnRead)
-	dsnWrite := helpers.GetConfig("mysql_dsn_write")
+	dsnWrite := fmt.Sprintf(
+		"%s:%s@(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s",
+		conf.MysqlAvatarWrite["username"],
+		conf.MysqlAvatarWrite["password"],
+		conf.MysqlAvatarWrite["ip"],
+		conf.MysqlAvatarWrite["port"],
+		conf.MysqlAvatarWrite["database"],
+		conf.MysqlAvatarWrite["charset"],
+		conf.MysqlAvatarWrite["parseTime"],
+		conf.MysqlAvatarWrite["loc"],
+	)
 	dbs["write"], err = gorm.Open("mysql", dsnWrite)
 	if err != nil {
 		return nil, err
@@ -34,7 +54,8 @@ func Conn() (dbs map[string]*gorm.DB, err error) {
 
 // 日志输出到文件
 func SetGormLogger(db *gorm.DB, key string) {
-	logFile := helpers.GetConfig("novel_db_log_file_" + key).(string)
+
+	logFile := conf.MysqlAvatarLog[key]
 	f, err := os.Create(logFile)
 	if err != nil {
 		fmt.Printf("get form err: %s", err.Error())

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/cihub/seelog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/sirupsen/logrus"
+	"novels-spider/conf"
 	"novels-spider/pkg/bootstrap"
-	"novels-spider/pkg/helpers"
 	"novels-spider/services"
 	"novels-spider/services/crons"
 	"novels-spider/services/customers"
@@ -14,12 +14,7 @@ import (
 
 func main() {
 
-	// bootstrap 的顺序不可打乱
-
 	bootstrap.LoadLogger()
-	defer bootstrap.LoggerFlush()
-
-	bootstrap.LoadLocalConfig()
 
 	bootstrap.SetDebugMode()
 
@@ -36,10 +31,10 @@ func main() {
 	customers.StartListen()
 
 	// web 服务
-	addr := helpers.GetConfig("port").(string)
+	addr := conf.Port
 	err := services.RegisterRouter(gin.New()).Run(addr)
 	if err != nil {
-		_ = seelog.Critical("http 服务启动错误", err)
+		logrus.Error("http 服务启动错误", err)
 		return
 	}
 }
