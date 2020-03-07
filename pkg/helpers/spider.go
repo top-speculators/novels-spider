@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-/************************************/
-/**********    爬虫函数相关    ********/
-/************************************/
-
 // 模拟 User-Agent
 func GetRandomUserAgent() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
